@@ -2,7 +2,7 @@
 Dockerised and using various libraries
 
 ## Clone repo
-```git clone https://github.com:obent1/calibration_example.git```
+```git clone git@github.com:obent1/calibration_example.git```
 
 ```cd calibration_example```
 ## Build
