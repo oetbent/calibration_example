@@ -21,7 +21,7 @@ parser.add_argument('--sfile', default= "config_mod.json", help='config file to 
 parser.add_argument('--dur', default= 3650, help='simulation duration')
 parser.add_argument('--demo', default="mod_demographics.json", help='demographic file to reference')
 parser.add_argument('--output', default="output/InsetChart.json", help='path to output file')
-parser.add_argument('--data', default="data/draw1.csv")
+parser.add_argument('--data', default="data/Monthly_EIR_data_for_Africa.csv")
 parser.add_argument('--demo_file', default= "Demographics/Namawala_single_node_demographics.json", help='demographic file to modify including path')
 
 args = parser.parse_args()
@@ -35,7 +35,8 @@ population = 10000 #this needs to be taken from Demographic file
 binary_path = "/model/IDM/EMOD/build/x64/Release/Eradication/Eradication"
 
 i = 0
-country = 96 #Kampala 5 Amudat
+country = "Uganda"
+site = "Tororo-Namwaya"
 
 def write_params(pin,r,inc,inf):
 	### write parameters to config file
@@ -92,34 +93,31 @@ def outputs(ind, label = "" ):
 
 def load_confirmed(country):
 	"""
-	Load confirmed cases downloaded from HDX
+	Load confirmed cases downloaded from monthly EIR
 	"""
 	df = pd.read_csv(data)
-	country_df = df[df["district"] == country]
-	pre_intervention = country_df[country_df["year"] < 1990]
-
-	return pre_intervention
-
-
-# def epi_function(pin, r, inc, inf):
-# 	write_params(pin, r,inc,inf)
-# 	global i
-# 	run(i)
-
-# 	##
-# 	model_infected = outputs(i,'Infected')
-# 	# print('model_infected', model_infected)
-# 	real_infected = load_confirmed(country)
-
-# 	### RMSE
-# 	real = np.array(real_infected["mean"].tolist())
-# 	print('real', real)
-# 	model = np.array(model_infected.tolist()).reshape(10,365).mean(axis=1)
-# 	print('model', model)
-# 	i+=1
+	country_df = df[df["Country"] == country]
+	site_df = country_df[country_df["Site"] == site]
+	start_month = int(site_df["Start Month"].tolist()[0])
+	# pre_intervention = country_df[country_df["year"] < 1990]
+	# print('site_df.head', site_df.head)
+	EIR = []
+	for i in range(12):
+		x = site_df["value"+str(i+1)].tolist()
+		EIR.append(x[0])
 
 
-# 	return -np.sum(np.sqrt((real-model)**2))
+	if -9.0 in EIR:
+		i = EIR.index(-9.0)
+		EIR = np.asarray(EIR)
+		EIR[i] = 'NaN'
+	else:
+		EIR = np.asarray(EIR)
+
+	# print('EIR', EIR)
+	# print('start_month', start_month)
+	return EIR, start_month
+
 
 client = OPTaaSClient('https://edu.optaas.mindfoundry.ai', 'laraaG8eicaeCahxeiy2')
 
@@ -144,19 +142,32 @@ def scoring_function(pin, r, inc, inf):
 	run(i)
 
 	##
-	model_infected = outputs(i,'Infected')
+	model_infected = outputs(i,'Daily EIR')
 	# print('model_infected', model_infected)
-	real_infected = load_confirmed(country)
+	real_infected, start_month = load_confirmed(country)
 
 	### RMSE
-	real = np.array(real_infected["mean"].tolist())
-	print('real', real)
-	model = np.array(model_infected.tolist()).reshape(10,365).mean(axis=1)
-	print('model', model)
+	real = real_infected
+	# print('real', real)
+	# model = np.array(model_infected.tolist()).reshape(10,365).mean(axis=1)
+	model_year = np.array(model_infected.tolist()).reshape(10,365)[-1,:]
+	# print('model_year', model_year)
+	model_month = model_year[:-5].reshape(12,30)
+	model_med = np.median(model_month, axis = 1)
+	# print('model_month', model_month)
+	# print('model_med', model_med)
+	if start_month > 1:
+		model_order = np.append(model_med[start_month-1:],model_med[:-start_month-1])
+	else:
+		model_order = model_med
+	# print('model[-1,:]', model[-1,:])
+	# print('model_order', model_order)
 	i+=1
 
+
 	#RMS Error
-	score = np.sum(np.sqrt((real-model)**2))
+	j = np.isnan(real)
+	score = np.mean(((np.ma.masked_array(real, j)-np.ma.masked_array(model_order,j))**2))
 
 	print('score', score)
 
@@ -175,7 +186,7 @@ task = client.create_task(
 # Run your task
 best_result = task.run(
     scoring_function,
-    max_iterations=5
+    max_iterations=3
     # score_threshold=32  # optional (defaults to the max_known_score defined above since the goal is "max")
 )
 
