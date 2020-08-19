@@ -9,6 +9,11 @@ import argparse
 import pandas as pd
 import numpy as np
 
+from mindfoundry.optaas.client.client import OPTaaSClient
+from mindfoundry.optaas.client.goal import Goal
+# from mindfoundry.optaas.client.expressions import Constraint
+from mindfoundry.optaas.client.parameter import IntParameter, FloatParameter, CategoricalParameter, BoolParameter, ChoiceParameter, GroupParameter, SubsetParameter
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--file', default= "config_vector.json", help='config file to modify including path')
@@ -96,8 +101,45 @@ def load_confirmed(country):
 	return pre_intervention
 
 
-def epi_function(pin, r, inc, inf):
+# def epi_function(pin, r, inc, inf):
+# 	write_params(pin, r,inc,inf)
+# 	global i
+# 	run(i)
+
+# 	##
+# 	model_infected = outputs(i,'Infected')
+# 	# print('model_infected', model_infected)
+# 	real_infected = load_confirmed(country)
+
+# 	### RMSE
+# 	real = np.array(real_infected["mean"].tolist())
+# 	print('real', real)
+# 	model = np.array(model_infected.tolist()).reshape(10,365).mean(axis=1)
+# 	print('model', model)
+# 	i+=1
+
+
+# 	return -np.sum(np.sqrt((real-model)**2))
+
+client = OPTaaSClient('https://edu.optaas.mindfoundry.ai', 'laraaG8eicaeCahxeiy2')
+
+# Define your parameters, e.g.
+pin = FloatParameter('pin', minimum=0, maximum=1) 
+r = FloatParameter('r', minimum=0, maximum=2) 
+inc = IntParameter('inc', minimum=0, maximum = 20)
+inf = IntParameter('inf', minimum=0, maximum=20) 
+
+parameters = [
+    pin,
+    r,
+    inc,
+    inf
+]
+
+
+def scoring_function(pin, r, inc, inf):
 	write_params(pin, r,inc,inf)
+
 	global i
 	run(i)
 
@@ -113,49 +155,28 @@ def epi_function(pin, r, inc, inf):
 	print('model', model)
 	i+=1
 
+	#RMS Error
+	score = np.sum(np.sqrt((real-model)**2))
 
-	return -np.sum(np.sqrt((real-model)**2))
+	print('score', score)
 
+	return score  # You can return just a score, or a tuple of (score, variance)
 
 # Bounded region of parameter space
-pbounds = {'pin': (0,1), 'r': (0, 2), 'inc': (0, 20), 'inf': (0,20)}
-
-new_opt  = BayesianOptimization(
-    f=epi_function,
-    pbounds=pbounds,
-    verbose=2, # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
-    random_state=1,
-)
-print(len(new_opt.space))
-
-# logger = JSONLogger(path="./logs.json")
-# new_opt.subscribe(Events.new_OPTIMIZATION_STEP, logger)
-
-load_logs(new_opt, logs=["./logs.json"])
-print("New new_opt is now aware of {} points.".format(len(new_opt.space)))
-
-# logger = JSONLogger(path="./logs.json")
-# new_opt.subscribe(Events.OPTIMIZATION_STEP, logger)
-# new_opt.probe(
-# 	params = {'inc': 0.0, 'inf': 5.7356442634751925, 'pin': 1.0, 'r': 0.31836332930670513},
-# 	lazy=True,
-# 	)
-
-# new_opt.probe(
-# 	params = {'inc': 2.0445771242785526, 'inf': 10.636516198747653, 'pin': 0.4417168510303957, 'r': 0.3460079168116166},
-# 	lazy=True,
-# 	)
-
-# new_opt.probe(
-# 	params = {'inc': 2.5048201335585523, 'inf': 2.1312587884113614, 'pin': 0.25289106069855105, 'r': 0.3710532429053029},
-# 	lazy=True,
-# 	)
-
-
-new_opt.maximize(
-    init_points=0,
-    n_iter=2,
+# Create your task
+task = client.create_task(
+    title='EMOD calib',
+    parameters=parameters,
+    # constraints=constraints,
+    goal=Goal.min  # or Goal.max as appropriate
+    # min_known_score= 11750#, max_known_score=44  # optional
 )
 
-print('max', new_opt.max)
-print('res', new_opt.res)
+# Run your task
+best_result = task.run(
+    scoring_function,
+    max_iterations=5
+    # score_threshold=32  # optional (defaults to the max_known_score defined above since the goal is "max")
+)
+
+print("Best Result: ", best_result)
