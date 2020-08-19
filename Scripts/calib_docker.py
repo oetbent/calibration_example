@@ -22,7 +22,7 @@ parser.add_argument('--demo_file', default= "Demographics/Namawala_single_node_d
 args = parser.parse_args()
 file, sfile, demo, dur, output, data, dfile= args.file, args.sfile, args.demo, args.dur, args.output, args.data, args.demo_file
 
-population = 10000 #this needs to be taken from Demographic file
+population = 1000 #this needs to be taken from Demographic file
 #Demographics file seeds the infection?
 #campaign file contains this
 
@@ -54,7 +54,7 @@ def write_params(pin,r,inc,inf):
 	#incubation period 1/a
 	config_json["parameters"]["Base_Incubation_Period"] = inc
 	#infectious period
-	config_json["parameters"]["Base_Infectious_Period"] = inf
+	config_json["parameters"]["Bae_Infectious_Period"] = inf
 	#####
 	#demographic file
 	config_json["parameters"]["Demographics_Filenames"] = [demo]
@@ -120,42 +120,41 @@ def epi_function(pin, r, inc, inf):
 # Bounded region of parameter space
 pbounds = {'pin': (0,1), 'r': (0, 2), 'inc': (0, 20), 'inf': (0,20)}
 
-new_opt  = BayesianOptimization(
+new_opt2  = BayesianOptimization(
     f=epi_function,
     pbounds=pbounds,
     verbose=2, # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
-    random_state=1,
+    random_state=40,
 )
-print(len(new_opt.space))
+print(len(new_opt2.space))
 
 # logger = JSONLogger(path="./logs.json")
-# new_opt.subscribe(Events.new_OPTIMIZATION_STEP, logger)
+# new_opt2.subscribe(Events.OPTIMIZATION_STEP, logger)
 
-load_logs(new_opt, logs=["./logs.json"])
-print("New new_opt is now aware of {} points.".format(len(new_opt.space)))
+load_logs(new_opt2, logs=["./logs.json"])
+print("New new_opt2 is now aware of {} points.".format(len(new_opt2.space)))
 
-# logger = JSONLogger(path="./logs.json")
-# new_opt.subscribe(Events.OPTIMIZATION_STEP, logger)
-# new_opt.probe(
+
+# new_opt2.probe(
 # 	params = {'inc': 0.0, 'inf': 5.7356442634751925, 'pin': 1.0, 'r': 0.31836332930670513},
 # 	lazy=True,
 # 	)
 
-# new_opt.probe(
+# new_opt2.probe(
 # 	params = {'inc': 2.0445771242785526, 'inf': 10.636516198747653, 'pin': 0.4417168510303957, 'r': 0.3460079168116166},
 # 	lazy=True,
 # 	)
 
-# new_opt.probe(
+# new_opt2.probe(
 # 	params = {'inc': 2.5048201335585523, 'inf': 2.1312587884113614, 'pin': 0.25289106069855105, 'r': 0.3710532429053029},
 # 	lazy=True,
 # 	)
 
 
-new_opt.maximize(
+new_opt2.maximize(
     init_points=0,
-    n_iter=2,
+    n_iter=17,
 )
 
-print('max', new_opt.max)
-print('res', new_opt.res)
+print('max', new_opt2.max)
+print('res', new_opt2.res)

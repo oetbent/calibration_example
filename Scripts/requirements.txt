@@ -1,4 +1,3 @@
-numpy==1.19.1
-mindfoundry_optaas_client==1.3.10
-bayesian_optimization==1.2.0
-pandas==1.1.0
+bayesian_optimization==1.1.0
+numpy==1.18.2
+pandas==0.23.0
