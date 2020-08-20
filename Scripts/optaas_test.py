@@ -71,7 +71,7 @@ def write_params(pin,r,inc,inf):
 
 def run(num):
 	#run config file
-	subprocess.call( [binary_path, "-C", "config_mod.json", "-O", str(num), "-I", "/model/Demographics/"] )
+	subprocess.call( [binary_path, "-C", "config_mod.json", "-O", country+'/'+site+'/'+str(num), "-I", "/model/Demographics/"] )
 
 def outputs(ind, label = "" ):
     with open( country+'/'+site+'/'+str(ind) + '/InsetChart.json' ) as ref_sim:
