@@ -3,6 +3,7 @@ FROM idmbloedow/emodbuiltimage:version0.91
 
 RUN mkdir /model/Demographics/
 RUN mkdir /model/data/
+RUN mkdir /model/Uganda/
 
 WORKDIR /model/
 
@@ -10,6 +11,7 @@ COPY Inputs/ .
 COPY Demographics_Files /model/Demographics/
 COPY Scripts/ .
 COPY Data/ /model/data/
+COPY Uganda /model/Uganda/
 
 
 RUN  unset -v PYTHONPATH
