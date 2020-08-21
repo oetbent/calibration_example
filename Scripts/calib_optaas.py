@@ -36,7 +36,11 @@ binary_path = "/model/IDM/EMOD/build/x64/Release/Eradication/Eradication"
 
 i = 0
 country = "Uganda"
-site = "Tororo-Namwaya"
+
+site = "Apac-Olami"
+# site = "Arua-Cilio"
+# site = "Kyenjojo_Kasiina"
+# site = "Tororo-Namwaya"
 
 def write_params(pin,r,inc,inf, trans):
 	### write parameters to config file
