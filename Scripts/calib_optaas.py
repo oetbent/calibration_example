@@ -38,7 +38,7 @@ i = 0
 country = "Uganda"
 site = "Tororo-Namwaya"
 
-def write_params(pin,r,inc,inf):
+def write_params(pin,r,inc,inf, trans):
 	### write parameters to config file
 
 	intital = open( dfile )
@@ -61,11 +61,16 @@ def write_params(pin,r,inc,inf):
 	config_json["parameters"]["Base_Incubation_Period"] = inc
 	#infectious period
 	config_json["parameters"]["Base_Infectious_Period"] = inf
+	#Transmission Probability
+	config_json["parameters"]["Vector_Species_Params"]["arabiensis"]["Transmission_Rate"] = trans
+	config_json["parameters"]["Vector_Species_Params"]["funestus"]["Transmission_Rate"] = trans
+	config_json["parameters"]["Vector_Species_Params"]["gambiae"]["Transmission_Rate"] = trans
 	#####
 	#demographic file
 	config_json["parameters"]["Demographics_Filenames"] = [demo]
 	#simulation duration
 	config_json["parameters"]["Simulation_Duration"] = dur
+
 	#####
 	# write the modified config file
 	modified_file = open( sfile, "w" )
@@ -126,17 +131,19 @@ pin = FloatParameter('pin', minimum=0, maximum=1)
 r = FloatParameter('r', minimum=0, maximum=2) 
 inc = IntParameter('inc', minimum=0, maximum = 20)
 inf = IntParameter('inf', minimum=0, maximum=20) 
+trans = FloatParameter('trans', minimum = 0, maximum = 1)
 
 parameters = [
     pin,
     r,
     inc,
-    inf
+    inf, 
+    trans
 ]
 
 
-def scoring_function(pin, r, inc, inf):
-	write_params(pin, r,inc,inf)
+def scoring_function(pin, r, inc, inf, trans):
+	write_params(pin, r,inc,inf, trans)
 
 	global i
 	run(i)
@@ -186,7 +193,7 @@ task = client.create_task(
 # Run your task
 best_result = task.run(
     scoring_function,
-    max_iterations=3
+    max_iterations=50
     # score_threshold=32  # optional (defaults to the max_known_score defined above since the goal is "max")
 )
 
