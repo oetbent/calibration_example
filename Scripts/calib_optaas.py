@@ -157,12 +157,24 @@ def scoring_function(pin, r, inc, inf, trans):
 	real = real_infected
 	# print('real', real)
 	# model = np.array(model_infected.tolist()).reshape(10,365).mean(axis=1)
-	model_year = np.array(model_infected.tolist()).reshape(10,365)[-1,:]
-	# print('model_year', model_year)
-	model_month = model_year[:-5].reshape(12,30)
-	model_med = np.median(model_month, axis = 1)
+	# model_year = np.array(model_infected.tolist()).reshape(10,365)[-1,:]
+	# # print('model_year', model_year)
+	# model_month = model_year[:-5].reshape(12,30)
+	# model_med = np.median(model_month, axis = 1)
 	# print('model_month', model_month)
 	# print('model_med', model_med)
+
+	model = np.array(model_infected.tolist()).reshape(10,365)
+	month = np.empty([5,12])
+	for j in range(12):
+		# print('model[:,j*30:(j+1)*30]', model[:,j*30:(j+1)*30])
+		# print('np.sum(model[:,j*30:(j+1)*30], axis = 1) ', np.sum(model[:,j*30:(j+1)*30], axis = 1) )
+		# print('np.sum(model[:,j*30:(j+1)*30], axis = 0) ', np.sum(model[:,j*30:(j+1)*30], axis = 0) )
+		month[:,j] =np.sum(model[-5:,j*30:(j+1)*30], axis = 1) #last 5 years
+	# print('model_year', model_year)
+	# print('month', month)
+	# model_month = model_year[:-5].reshape(12,30)
+	model_med = np.median(month, axis = 0)
 	if start_month > 1:
 		model_order = np.append(model_med[start_month-1:],model_med[:-start_month-1])
 	else:

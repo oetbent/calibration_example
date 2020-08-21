@@ -35,7 +35,7 @@ i = 0
 country = "Uganda"
 site = "Apac-Olami"
 
-def write_params(pin,r,inc,inf):
+def write_params(pin,r,inc,inf, trans):
 	### write parameters to config file
 
 	intital = open( dfile )
@@ -63,6 +63,10 @@ def write_params(pin,r,inc,inf):
 	config_json["parameters"]["Demographics_Filenames"] = [demo]
 	#simulation duration
 	config_json["parameters"]["Simulation_Duration"] = dur
+	#Transmission Probability
+	config_json["parameters"]["Vector_Species_Params"]["arabiensis"]["Transmission_Rate"] = trans
+	config_json["parameters"]["Vector_Species_Params"]["funestus"]["Transmission_Rate"] = trans
+	config_json["parameters"]["Vector_Species_Params"]["gambiae"]["Transmission_Rate"] = trans
 	#####
 	# write the modified config file
 	modified_file = open( sfile, "w" )
@@ -143,16 +147,18 @@ pin = FloatParameter('pin', minimum=0, maximum=1)
 r = FloatParameter('r', minimum=0, maximum=2) 
 inc = IntParameter('inc', minimum=0, maximum = 20)
 inf = IntParameter('inf', minimum=0, maximum=20) 
+trans = FloatParameter('trans', minimum = 0, maximum = 1)
 
 parameters = [
     pin,
     r,
     inc,
-    inf
+    inf,
+    trans
 ]
 
 
-def scoring_function(pin, r, inc, inf):
+def scoring_function(pin, r, inc, inf, trans):
 	# write_params(pin, r,inc,inf)
 
 	global i
@@ -160,7 +166,7 @@ def scoring_function(pin, r, inc, inf):
 
 	##
 	model_infected = outputs(i,'Daily EIR')
-	print('model_EIR', model_infected)
+	# print('model_EIR', model_infected)
 	real_infected, start_month = load_confirmed(country)
 
 	### RMSE
@@ -168,9 +174,17 @@ def scoring_function(pin, r, inc, inf):
 	# print('real', real)
 	# model = np.array(model_infected.tolist()).reshape(10,365).mean(axis=1)
 	model_year = np.array(model_infected.tolist()).reshape(10,365)[-1,:]
+	model = np.array(model_infected.tolist()).reshape(10,365)
+	month = np.empty([5,12])
+	for j in range(12):
+		# print('model[:,j*30:(j+1)*30]', model[:,j*30:(j+1)*30])
+		# print('np.sum(model[:,j*30:(j+1)*30], axis = 1) ', np.sum(model[:,j*30:(j+1)*30], axis = 1) )
+		# print('np.sum(model[:,j*30:(j+1)*30], axis = 0) ', np.sum(model[:,j*30:(j+1)*30], axis = 0) )
+		month[:,j] =np.sum(model[-5:,j*30:(j+1)*30], axis = 1) 
 	# print('model_year', model_year)
-	model_month = model_year[:-5].reshape(12,30)
-	model_med = np.median(model_month, axis = 1)
+	# print('month', month)
+	# model_month = model_year[:-5].reshape(12,30)
+	model_med = np.median(month, axis = 0)
 	# print('model_month', model_month)
 	# print('model_med', model_med)
 	if start_month > 1:
@@ -178,7 +192,7 @@ def scoring_function(pin, r, inc, inf):
 	else:
 		model_order = model_med
 	# print('model[-1,:]', model[-1,:])
-	# print('model_order', model_order)
+	print('model_order', model_order)
 	i+=1
 
 
