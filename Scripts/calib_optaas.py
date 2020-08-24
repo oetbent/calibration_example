@@ -129,7 +129,7 @@ def load_confirmed(country):
 		real = EIR
 		# print('EIR', EIR)
 		# print('start_month', start_month)
-		return real
+	return real
 
 
 client = OPTaaSClient('https://edu.optaas.mindfoundry.ai', 'laraaG8eicaeCahxeiy2')
