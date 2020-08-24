@@ -124,12 +124,12 @@ def load_confirmed(country):
 		EIR = np.asarray(EIR)
 
 	if start_month >1:
-    	real = np.append(EIR[start_month-1:],EIR[:-start_month-1])
-  	else:
-    	real = EIR
-  	# print('EIR', EIR)
-  	# print('start_month', start_month)
-  	return real
+		real = np.append(EIR[start_month-1:],EIR[:-start_month-1])
+	else:
+		real = EIR
+		# print('EIR', EIR)
+		# print('start_month', start_month)
+		return real
 
 
 client = OPTaaSClient('https://edu.optaas.mindfoundry.ai', 'laraaG8eicaeCahxeiy2')
