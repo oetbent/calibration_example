@@ -123,9 +123,13 @@ def load_confirmed(country):
 	else:
 		EIR = np.asarray(EIR)
 
-	# print('EIR', EIR)
-	# print('start_month', start_month)
-	return EIR, start_month
+	if start_month >1:
+    	real = np.append(EIR[start_month-1:],EIR[:-start_month-1])
+  	else:
+    	real = EIR
+  	# print('EIR', EIR)
+  	# print('start_month', start_month)
+  	return real
 
 
 client = OPTaaSClient('https://edu.optaas.mindfoundry.ai', 'laraaG8eicaeCahxeiy2')
@@ -155,18 +159,11 @@ def scoring_function(pin, r, inc, inf, trans):
 	##
 	model_infected = outputs(i,'Daily EIR')
 	# print('model_infected', model_infected)
-	real_infected, start_month = load_confirmed(country)
+	real_infected = load_confirmed(country)
 
 	### RMSE
 	real = real_infected
-	# print('real', real)
-	# model = np.array(model_infected.tolist()).reshape(10,365).mean(axis=1)
-	# model_year = np.array(model_infected.tolist()).reshape(10,365)[-1,:]
-	# # print('model_year', model_year)
-	# model_month = model_year[:-5].reshape(12,30)
-	# model_med = np.median(model_month, axis = 1)
-	# print('model_month', model_month)
-	# print('model_med', model_med)
+
 
 	model = np.array(model_infected.tolist()).reshape(10,365)
 	month = np.empty([5,12])
@@ -179,18 +176,14 @@ def scoring_function(pin, r, inc, inf, trans):
 	# print('month', month)
 	# model_month = model_year[:-5].reshape(12,30)
 	model_med = np.median(month, axis = 0)
-	if start_month > 1:
-		model_order = np.append(model_med[start_month-1:],model_med[:-start_month-1])
-	else:
-		model_order = model_med
 	# print('model[-1,:]', model[-1,:])
 	# print('model_order', model_order)
 	i+=1
 
 
 	#RMS Error
-	j = np.isnan(real)
-	score = np.mean(((np.ma.masked_array(real, j)-np.ma.masked_array(model_order,j))**2))
+	se = (real-model_med)**2
+	score = np.mean(np.ma.masked_array(se, np.isnan(se)))
 
 	print('score', score)
 
