@@ -37,8 +37,8 @@ binary_path = "/model/IDM/EMOD/build/x64/Release/Eradication/Eradication"
 i = 0
 country = "Uganda"
 
-site = "Apac-Olami"
-# site = "Arua-Cilio"
+#site = "Apac-Olami"
+site = "Arua-Cilio"
 # site = "Kyenjojo_Kasiina"
 # site = "Tororo-Namwaya"
 
@@ -198,7 +198,7 @@ task = client.create_task(
     goal=Goal.min  # or Goal.max as appropriate
     # min_known_score= 11750#, max_known_score=44  # optional
 )
-n = 1
+n = 50
 # Run your task
 best_result = task.run(
     scoring_function,
@@ -208,7 +208,7 @@ best_result = task.run(
 
 print("Best Result: ", best_result)
 
-m = 10
+m = 500
 
 random_configs_values = [{'pin': np.random.uniform(0, 1), 
                           'r': np.random.uniform(0, 2),
@@ -246,5 +246,5 @@ print('evaluations_projected', evaluations_projected)
 
 samples = np.concatenate((np.asarray(surrogate_X).reshape(m,5),surrogate_projected.reshape(m,2),mean.reshape(m,1),var.reshape(m,1)), axis =1)
 evaluations = np.concatenate((np.asarray(evaluations_X).reshape(n,5),evaluations_projected.reshape(n,2),evaluations_score.reshape(n,1)), axis =1)
-np.save('surogate_results', samples)
+np.save('surrogate_results', samples)
 np.save('task_results', evaluations)
