@@ -236,7 +236,7 @@ evaluations_score = [r.score for r in results]
 evaluations_X = [[c['pin'], c['r'], c['inc'], c['inf'], c['trans']] for c in evaluations_config_values]
 evaluations_projected = pca.transform(evaluations_X)
 
-samples = np.hstack((surrogate_X,surrogate_projected,mean,var))
-evaluations = np.hstack((evaluations_X,evaluations_projected,evaluations_score))
+samples = np.concatenate((surrogate_X,surrogate_projected,mean,var))
+evaluations = np.concatenate((evaluations_X,evaluations_projected,evaluations_score))
 np.save('surogate_results', samples)
 np.save('task_results', evaluations)
