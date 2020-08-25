@@ -198,22 +198,23 @@ task = client.create_task(
     goal=Goal.min  # or Goal.max as appropriate
     # min_known_score= 11750#, max_known_score=44  # optional
 )
-
+n = 1
 # Run your task
 best_result = task.run(
     scoring_function,
-    max_iterations=1
+    max_iterations=n
     # score_threshold=32  # optional (defaults to the max_known_score defined above since the goal is "max")
 )
 
 print("Best Result: ", best_result)
 
+m = 10
 
 random_configs_values = [{'pin': np.random.uniform(0, 1), 
                           'r': np.random.uniform(0, 2),
                           'inc': np.random.randint(21),
                           'inf': np.random.randint(21),
-                          'trans': np.random.uniform(0,1)} for _ in range(10)]
+                          'trans': np.random.uniform(0,1)} for _ in range(m)]
 
 predictions = task.get_surrogate_predictions(random_configs_values)
 
@@ -243,7 +244,7 @@ print('evaluations_X', evaluations_X)
 evaluations_projected = pca.transform(evaluations_X)
 print('evaluations_projected', evaluations_projected)
 
-samples = np.concatenate((surrogate_X,surrogate_projected,mean,var))
-evaluations = np.concatenate((evaluations_X,evaluations_projected,evaluations_score))
+samples = np.concatenate((surrogate_X.reshape(m,5),surrogate_projected.reshape(m,2),mean.reshape(m,1),var.reshape(m,1)))
+evaluations = np.concatenate((evaluations_X.reshape(n,5),evaluations_projected.reshape(n,2),evaluations_score.reshape(n,1)))
 np.save('surogate_results', samples)
 np.save('task_results', evaluations)
