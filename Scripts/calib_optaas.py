@@ -228,8 +228,8 @@ pca = PCA(n_components=2)
 surrogate_projected = pca.fit_transform(surrogate_X)
 print('surrogate_projected', surrogate_projected)
 
-mean = [p.mean for p in predictions]
-var = [p.variance for p in predictions]
+mean = np.asarray([p.mean for p in predictions])
+var = np.asarray([p.variance for p in predictions])
 print('mean', mean)
 print('var', var)
 
