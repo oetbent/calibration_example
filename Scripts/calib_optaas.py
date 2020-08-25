@@ -202,7 +202,7 @@ task = client.create_task(
 # Run your task
 best_result = task.run(
     scoring_function,
-    max_iterations=2
+    max_iterations=1
     # score_threshold=32  # optional (defaults to the max_known_score defined above since the goal is "max")
 )
 
@@ -213,28 +213,35 @@ random_configs_values = [{'pin': np.random.uniform(0, 1),
                           'r': np.random.uniform(0, 2),
                           'inc': np.random.randint(21),
                           'inf': np.random.randint(21),
-                          'trans': np.random.uniform(0,1)} for _ in range(500)]
+                          'trans': np.random.uniform(0,1)} for _ in range(10)]
 
 predictions = task.get_surrogate_predictions(random_configs_values)
+
 
 from sklearn.decomposition.pca import PCA
 
 surrogate_X = [[c['pin'], c['r'], c['inc'], c['inf'], c['trans']] for c in random_configs_values]
+print('surrogate_X', surrogate_X)
 
 pca = PCA(n_components=2)
 surrogate_projected = pca.fit_transform(surrogate_X)
+print('surrogate_projected', surrogate_projected)
 
 mean = [p.mean for p in predictions]
 var = [p.variance for p in predictions]
+print('mean', mean)
+print('var', var)
 
 
 results = task.get_results()
 
 evaluations_config_values = [r.configuration.values for r in results]
 evaluations_score = [r.score for r in results]
-
+print('evaluations_score', evaluations_score)
 evaluations_X = [[c['pin'], c['r'], c['inc'], c['inf'], c['trans']] for c in evaluations_config_values]
+print('evaluations_X', evaluations_X)
 evaluations_projected = pca.transform(evaluations_X)
+print('evaluations_projected', evaluations_projected)
 
 samples = np.concatenate((surrogate_X,surrogate_projected,mean,var))
 evaluations = np.concatenate((evaluations_X,evaluations_projected,evaluations_score))
