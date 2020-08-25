@@ -202,7 +202,7 @@ task = client.create_task(
 # Run your task
 best_result = task.run(
     scoring_function,
-    max_iterations=5
+    max_iterations=2
     # score_threshold=32  # optional (defaults to the max_known_score defined above since the goal is "max")
 )
 
