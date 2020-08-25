@@ -237,14 +237,14 @@ print('var', var)
 results = task.get_results()
 
 evaluations_config_values = [r.configuration.values for r in results]
-evaluations_score = [r.score for r in results]
+evaluations_score = np.asarray([r.score for r in results])
 print('evaluations_score', evaluations_score)
 evaluations_X = [[c['pin'], c['r'], c['inc'], c['inf'], c['trans']] for c in evaluations_config_values]
 print('evaluations_X', evaluations_X)
 evaluations_projected = pca.transform(evaluations_X)
 print('evaluations_projected', evaluations_projected)
 
-samples = np.concatenate((np.asarray(surrogate_X).reshape(m,5),surrogate_projected.reshape(m,2),mean.reshape(m,1),var.reshape(m,1)))
-evaluations = np.concatenate((np.asarray(evaluations_X).reshape(n,5),evaluations_projected.reshape(n,2),evaluations_score.reshape(n,1)))
+samples = np.concatenate((np.asarray(surrogate_X).reshape(m,5),surrogate_projected.reshape(m,2),mean.reshape(m,1),var.reshape(m,1)), axis =1)
+evaluations = np.concatenate((np.asarray(evaluations_X).reshape(n,5),evaluations_projected.reshape(n,2),evaluations_score.reshape(n,1)), axis =1)
 np.save('surogate_results', samples)
 np.save('task_results', evaluations)
