@@ -211,8 +211,8 @@ print("Best Result: ", best_result)
 
 random_configs_values = [{'pin': np.random.uniform(0, 1), 
                           'r': np.random.uniform(0, 2),
-                          'inc': np.random.uniform(0, 20),
-                          'inf': np.random.uniform(0,20),
+                          'inc': np.random.randint(21),
+                          'inf': np.random.randint(21),
                           'trans': np.random.uniform(0,1)} for _ in range(500)]
 
 predictions = task.get_surrogate_predictions(random_configs_values)
