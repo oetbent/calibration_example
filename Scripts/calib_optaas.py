@@ -202,8 +202,41 @@ task = client.create_task(
 # Run your task
 best_result = task.run(
     scoring_function,
-    max_iterations=50
+    max_iterations=5
     # score_threshold=32  # optional (defaults to the max_known_score defined above since the goal is "max")
 )
 
 print("Best Result: ", best_result)
+
+
+random_configs_values = [{'pin': np.random.uniform(0, 1), 
+                          'r': np.random.uniform(0, 2),
+                          'inc': np.random.uniform(0, 20),
+                          'inf': np.random.uniform(0,20),
+                          'trans': np.random.uniform(0,1)} for _ in range(500)]
+
+predictions = task.get_surrogate_predictions(random_configs_values)
+
+from sklearn.decomposition.pca import PCA
+
+surrogate_X = [[c['pin'], c['r'], c['inc'], c['inf'], c['trans']] for c in random_configs_values]
+
+pca = PCA(n_components=2)
+surrogate_projected = pca.fit_transform(surrogate_X)
+
+mean = [p.mean for p in predictions]
+var = [p.variance for p in predictions]
+
+
+results = task.get_results()
+
+evaluations_config_values = [r.configuration.values for r in results]
+evaluations_score = [r.score for r in results]
+
+evaluations_X = [[c['pin'], c['r'], c['inc'], c['inf'], c['trans']] for c in evaluations_config_values]
+evaluations_projected = pca.transform(evaluations_X)
+
+samples = np.hstack((surrogate_X,surrogate_projected,mean,var))
+evaluations = np.hstack((evaluations_X,evaluations_projected,evaluations_score))
+np.save('surogate_results', samples)
+np.save('task_results', evaluations)
