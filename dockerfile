@@ -11,7 +11,7 @@ COPY Inputs/ .
 COPY Demographics_Files /model/Demographics/
 COPY Scripts/ .
 COPY Data/ /model/data/
-COPY Uganda /model/Uganda/
+COPY Tanzania /model/Tanzania/
 
 
 RUN  unset -v PYTHONPATH
