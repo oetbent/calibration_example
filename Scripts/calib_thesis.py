@@ -185,9 +185,9 @@ def scoring_function(pin, r, inc, inf, trans):
 	i+=1
 
 
-	#RMS Error
+	#NRMS Error
 	se = (real-model_med)**2
-	score = np.mean(np.ma.masked_array(se, np.isnan(se)))
+	score = np.sqrt(np.mean(np.ma.masked_array(se, np.isnan(se))))/(np.amax(real)-np.amin(real))
 
 	print('score', score)
 
@@ -202,7 +202,7 @@ task = client.create_task(
     goal=Goal.min  # or Goal.max as appropriate
     # min_known_score= 11750#, max_known_score=44  # optional
 )
-n = 50
+n = 10
 # Run your task
 best_result = task.run(
     scoring_function,
